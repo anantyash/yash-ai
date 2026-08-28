@@ -1,0 +1,14 @@
+{
+  "name": "yash-ai-portfolio-root",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "migrate": "npm --prefix backend run migrate",
+    "ingest": "npm --prefix backend run ingest",
+    "test:backend": "npm --prefix backend test",
+    "build:frontend": "npm --prefix frontend run build"
+  }
+}
