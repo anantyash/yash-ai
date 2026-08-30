@@ -13,8 +13,8 @@ export interface SessionData {
 
 export interface AskResult {
   answer: string;
-  service: 'ask';
-  provider: 'gemini';
+  service: "ask";
+  provider: "gemini";
   model: string;
   usage: {
     inputTokens: number;
@@ -38,8 +38,8 @@ export interface RagSource {
 
 export interface RagResult {
   answer: string;
-  service: 'rag';
-  provider: 'openai';
+  service: "rag";
+  provider: "openai";
   model: string;
   sources: RagSource[];
   usage: {
@@ -62,6 +62,21 @@ export interface ApiError {
 }
 
 type LimitsListener = (limits: SessionLimits) => void;
+
+/**
+ * Base URL for API requests.
+ * In development, defaults to '' (relative path) to use Vite proxy (/api -> http://localhost:4000).
+ * In production or custom environments, reads VITE_API_BASE_URL from .env (e.g. https://api.yash.ai).
+ */
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(
+  /\/+$/,
+  "",
+);
+
+export function getApiUrl(endpoint: string): string {
+  const normalized = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  return `${API_BASE_URL}${normalized}`;
+}
 
 class ApiClient {
   private sessionId: string | null = null;
@@ -104,7 +119,7 @@ class ApiClient {
     if (this.sessionId && this.limits) {
       return {
         sessionId: this.sessionId,
-        expiresAt: '',
+        expiresAt: "",
         limits: this.limits,
       };
     }
@@ -114,37 +129,37 @@ class ApiClient {
     }
 
     this.sessionPromise = (async () => {
-      const storedId = localStorage.getItem('yash_ai_session_id');
+      const storedId = localStorage.getItem("yash_ai_session_id");
 
       try {
-        const res = await fetch('/api/session', {
-          method: 'POST',
+        const res = await fetch(getApiUrl("/api/session"), {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            ...(storedId ? { 'X-Session-Id': storedId } : {}),
+            "Content-Type": "application/json",
+            ...(storedId ? { "X-Session-Id": storedId } : {}),
           },
         });
 
         if (!res.ok) {
-          throw new Error('Failed to initialize session');
+          throw new Error("Failed to initialize session");
         }
 
         const data: SessionData = await res.json();
         this.sessionId = data.sessionId;
         this.limits = data.limits;
-        localStorage.setItem('yash_ai_session_id', data.sessionId);
+        localStorage.setItem("yash_ai_session_id", data.sessionId);
         this.notifyLimits();
         return data;
       } catch {
         // Safe fallback for local/offline usage
         const fallback: SessionData = {
-          sessionId: storedId || 'local-session',
+          sessionId: storedId || "local-session",
           expiresAt: new Date(Date.now() + 86400000).toISOString(),
           limits: {
             askQuestionsRemaining: 8,
             ragQuestionsRemaining: 3,
-            askTokensRemaining: 3000,
-            ragTokensRemaining: 2500,
+            askTokensRemaining: 10000,
+            ragTokensRemaining: 10000,
           },
         };
         this.sessionId = fallback.sessionId;
@@ -165,8 +180,8 @@ class ApiClient {
   private checkClientThrottle(): void {
     if (this.activeRequest) {
       throw {
-        code: 'CONCURRENT_REQUEST',
-        message: 'An AI request is already in progress. Please wait a moment.',
+        code: "CONCURRENT_REQUEST",
+        message: "An AI request is already in progress. Please wait a moment.",
       } as ApiError;
     }
 
@@ -174,8 +189,9 @@ class ApiClient {
     const elapsed = now - this.lastRequestTime;
     if (elapsed < 1200) {
       throw {
-        code: 'CLIENT_THROTTLE',
-        message: 'Please wait a second between queries to avoid exceeding rate limits.',
+        code: "CLIENT_THROTTLE",
+        message:
+          "Please wait a second between queries to avoid exceeding rate limits.",
       } as ApiError;
     }
   }
@@ -186,8 +202,9 @@ class ApiClient {
     // Client-side quota guard
     if (this.limits && this.limits.askQuestionsRemaining <= 0) {
       throw {
-        code: 'SESSION_BUDGET_EXCEEDED',
-        message: 'You have reached your Ask Yash question quota for this session (8 questions).',
+        code: "SESSION_BUDGET_EXCEEDED",
+        message:
+          "You have reached your Ask Yash question quota for this session (8 questions).",
       } as ApiError;
     }
 
@@ -197,11 +214,11 @@ class ApiClient {
     try {
       const session = await this.getSession();
 
-      const response = await fetch('/api/ask', {
-        method: 'POST',
+      const response = await fetch(getApiUrl("/api/ask"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Id': session.sessionId,
+          "Content-Type": "application/json",
+          "X-Session-Id": session.sessionId,
         },
         body: JSON.stringify({
           sessionId: session.sessionId,
@@ -212,11 +229,12 @@ class ApiClient {
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
         const err: ApiError = errorPayload.error || {
-          code: response.status === 429 ? 'RATE_LIMIT_EXCEEDED' : 'REQUEST_FAILED',
+          code:
+            response.status === 429 ? "RATE_LIMIT_EXCEEDED" : "REQUEST_FAILED",
           message:
             response.status === 429
-              ? 'Rate limit exceeded (5 req/min). Please wait 60 seconds.'
-              : 'Unable to connect to Ask Yash service. Please check your backend connection.',
+              ? "Rate limit exceeded (5 req/min). Please wait 60 seconds."
+              : "Unable to connect to Ask Yash service. Please check your backend connection.",
           retryAfterSeconds: response.status === 429 ? 60 : undefined,
         };
         throw err;
@@ -240,8 +258,9 @@ class ApiClient {
     // Client-side quota guard
     if (this.limits && this.limits.ragQuestionsRemaining <= 0) {
       throw {
-        code: 'SESSION_BUDGET_EXCEEDED',
-        message: 'You have reached your RAG query quota for this session (3 queries).',
+        code: "SESSION_BUDGET_EXCEEDED",
+        message:
+          "You have reached your RAG query quota for this session (3 queries).",
       } as ApiError;
     }
 
@@ -251,11 +270,11 @@ class ApiClient {
     try {
       const session = await this.getSession();
 
-      const response = await fetch('/api/rag/query', {
-        method: 'POST',
+      const response = await fetch(getApiUrl("/api/rag/query"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Id': session.sessionId,
+          "Content-Type": "application/json",
+          "X-Session-Id": session.sessionId,
         },
         body: JSON.stringify({
           sessionId: session.sessionId,
@@ -267,11 +286,12 @@ class ApiClient {
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
         const err: ApiError = errorPayload.error || {
-          code: response.status === 429 ? 'RATE_LIMIT_EXCEEDED' : 'REQUEST_FAILED',
+          code:
+            response.status === 429 ? "RATE_LIMIT_EXCEEDED" : "REQUEST_FAILED",
           message:
             response.status === 429
-              ? 'Rate limit exceeded (5 req/min). Please wait 60 seconds.'
-              : 'Unable to retrieve RAG response. Please check your backend connection.',
+              ? "Rate limit exceeded (5 req/min). Please wait 60 seconds."
+              : "Unable to retrieve RAG response. Please check your backend connection.",
           retryAfterSeconds: response.status === 429 ? 60 : undefined,
         };
         throw err;

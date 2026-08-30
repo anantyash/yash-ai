@@ -14,6 +14,7 @@
 ---
 
 ## 📑 Table of Contents
+
 1. [Executive Summary & Capabilities](#-executive-summary--capabilities)
 2. [End-to-End System Architecture](#-end-to-end-system-architecture)
 3. [Project File Structure](#-project-file-structure)
@@ -34,11 +35,11 @@
 
 **YASH.AI** is not a basic portfolio wrapper around an LLM. It is a full-featured, resilient AI Control Plane and Gateway designed with enterprise software engineering standards:
 
-* **Multi-Model Orchestration**: Leverages **Google Gemini 3.6 Flash** for instantaneous portfolio persona chat and **OpenAI `gpt-4o-mini` + `text-embedding-3-small`** for grounded vector document question answering.
-* **Vector Knowledge Retrieval**: Uses PostgreSQL 16 with the **`pgvector` extension** to perform cosine similarity lookups over indexed markdown documentation.
-* **Cost & Budget Protection**: Implements a strict **Two-Phase Token Reservation & Reconciliation Algorithm** using Redis to protect against runaway API billing.
-* **Concurrency & Abuse Safeguards**: Distributed locks, IP-based sliding rate limiters, client-side debounce/cooldown timers, and strict prompt injection scanners.
-* **Rich Markdown Synthesis**: Dynamically compiles streaming/JSON markdown outputs with styled headers, bulleted lists, and inline code badges.
+- **Multi-Model Orchestration**: Leverages **Google Gemini 3.6 Flash** for instantaneous portfolio persona chat and **OpenAI `gpt-4o-mini` + `text-embedding-3-small`** for grounded vector document question answering.
+- **Vector Knowledge Retrieval**: Uses PostgreSQL 16 with the **`pgvector` extension** to perform cosine similarity lookups over indexed markdown documentation.
+- **Cost & Budget Protection**: Implements a strict **Two-Phase Token Reservation & Reconciliation Algorithm** using Redis to protect against runaway API billing.
+- **Concurrency & Abuse Safeguards**: Distributed locks, IP-based sliding rate limiters, client-side debounce/cooldown timers, and strict prompt injection scanners.
+- **Rich Markdown Synthesis**: Dynamically compiles streaming/JSON markdown outputs with styled headers, bulleted lists, and inline code badges.
 
 ---
 
@@ -264,33 +265,42 @@ sequenceDiagram
 ```
 
 ### 1. Backend Sliding Window IP Limiter (`rate-limiter.ts`)
-* **Key Format**: `rate_limit:ip:<normalized_ip>`
-* **Window Duration**: `60,000ms` (1 minute).
-* **Threshold**: Maximum **5 requests / minute per IP**.
-* **Atomic Redis Pipeline**:
+
+- **Key Format**: `rate_limit:ip:<normalized_ip>`
+- **Window Duration**: `60,000ms` (1 minute).
+- **Threshold**: Maximum **5 requests / minute per IP**.
+- **Atomic Redis Pipeline**:
   ```ts
   const current = await redis.incr(key);
   if (current === 1) {
     await redis.pexpire(key, env.RATE_LIMIT_WINDOW_MS);
   }
   ```
-* **Headers Injected**:
+- **Headers Injected**:
   - `X-RateLimit-Limit`: `5`
   - `X-RateLimit-Remaining`: Math.max(0, `5 - current`)
   - `X-RateLimit-Reset`: Milliseconds remaining until key TTL expiry.
-* **Violation Response**: Returns `HTTP 429` with JSON error payload `{ code: 'RATE_LIMIT_EXCEEDED', retryAfterSeconds: 60 }`.
+- **Violation Response**: Returns `HTTP 429` with JSON error payload `{ code: 'RATE_LIMIT_EXCEEDED', retryAfterSeconds: 60 }`.
 
 ### 2. Distributed Session Concurrency Lock
-* To prevent duplicate concurrent requests (e.g. rapid double-clicking or scripted bursts from the same session), the gateway creates an atomic distributed lock:
+
+- To prevent duplicate concurrent requests (e.g. rapid double-clicking or scripted bursts from the same session), the gateway creates an atomic distributed lock:
   ```ts
-  const acquired = await redis.set(`session:${sessionId}:lock`, '1', 'EX', 30, 'NX');
+  const acquired = await redis.set(
+    `session:${sessionId}:lock`,
+    "1",
+    "EX",
+    30,
+    "NX",
+  );
   ```
-* If a lock exists, the gateway rejects the second request immediately with `HTTP 409 Concurrent Request`.
-* The lock is released in a `finally` block once generation and token reconciliation finish.
+- If a lock exists, the gateway rejects the second request immediately with `HTTP 409 Concurrent Request`.
+- The lock is released in a `finally` block once generation and token reconciliation finish.
 
 ### 3. Client-Side Throttle Protection (`api.ts` & `AILab.tsx`)
-* **Debounce Guard**: Enforces a minimum interval of **1,200ms** between user queries directly in the frontend browser client.
-* **Auto-Cooldown Countdown**: When an HTTP 429 is received, the frontend automatically starts a synchronized ticking countdown timer, disables input fields, and displays the remaining cooldown duration.
+
+- **Debounce Guard**: Enforces a minimum interval of **1,200ms** between user queries directly in the frontend browser client.
+- **Auto-Cooldown Countdown**: When an HTTP 429 is received, the frontend automatically starts a synchronized ticking countdown timer, disables input fields, and displays the remaining cooldown duration.
 
 ---
 
@@ -320,57 +330,61 @@ graph TD
 ```
 
 ### 1. High-Performance Response & Embedding Caching
-* **Ask Query Cache**: Keys are structured as `cache:ask:<sha256(normalized_question)>`.
+
+- **Ask Query Cache**: Keys are structured as `cache:ask:<sha256(normalized_question)>`.
   - Normalization trims whitespace, strips punctuation, and converts queries to lowercase.
   - Identical queries are returned instantly in **$<5\text{ms}$** with `cacheHit: true` and `usage: { totalTokens: 0 }`, saving 100% of LLM cost.
   - Configured with a default TTL of **3,600 seconds (1 hour)**.
-* **Vector Embedding Cache**: Keys are structured as `cache:embed:<sha256(text)>`.
+- **Vector Embedding Cache**: Keys are structured as `cache:embed:<sha256(text)>`.
   - Avoids re-requesting OpenAI `text-embedding-3-small` for repeated queries.
   - Configured with a default TTL of **86,400 seconds (24 hours)**.
 
 ### 2. Two-Phase Token Reservation & Reconciliation Algorithm
+
 The gateway implements an atomic token accounting mechanism to guarantee that daily API spend never exceeds budget:
 
 $$\text{Estimated Tokens } (E) = \text{tokens}(Q) + \text{tokens}(C) + \text{Max Output Tokens}$$
 
 1. **Phase 1: Pre-Call Reservation**:
-   * Computes the pessimistic token requirement $E$.
-   * Atomically queries Redis for the sum of `used + reserved` tokens for the current UTC day.
-   * If $(\text{used} + \text{reserved} + E) > \text{GLOBAL\_DAILY\_TOKEN\_LIMIT} \ (30,000)$, the call is rejected before hitting Gemini or OpenAI:
+   - Computes the pessimistic token requirement $E$.
+   - Atomically queries Redis for the sum of `used + reserved` tokens for the current UTC day.
+   - If $(\text{used} + \text{reserved} + E) > \text{GLOBAL\_DAILY\_TOKEN\_LIMIT} \ (30,000)$, the call is rejected before hitting Gemini or OpenAI:
      ```ts
      await redis.incrby(`budget:global:${today}:reserved`, estimatedTokens);
      ```
 2. **Phase 2: Post-Call Reconciliation**:
-   * The AI provider responds with actual tokens consumed $A$ (e.g. $A = \text{inputTokens} + \text{outputTokens}$).
-   * In a single atomic operation:
+   - The AI provider responds with actual tokens consumed $A$ (e.g. $A = \text{inputTokens} + \text{outputTokens}$).
+   - In a single atomic operation:
      - Deducts $E$ from `budget:global:${today}:reserved`.
      - Adds $A$ to `budget:global:${today}:used`.
      - Records $A$ in PostgreSQL `sessions` and `usage_logs`.
-   * If the API call fails or times out, $E$ is returned to the reservation pool without penalizing daily usage.
+   - If the API call fails or times out, $E$ is returned to the reservation pool without penalizing daily usage.
 
 ---
 
 ## 🤖 Dual AI Services Deep Dive
 
 ### Service 1: Ask Yash (Google Gemini 3.6 Flash)
-* **Purpose**: Conversational AI assistant grounded in Yash’s resume, technical skills, projects, and career history.
-* **Model**: `gemini-3.6-flash` via the official `@ai-sdk/google` provider.
-* **Reasoning Headroom & Output Guarantee**:
+
+- **Purpose**: Conversational AI assistant grounded in Yash’s resume, technical skills, projects, and career history.
+- **Model**: `gemini-3.6-flash` via the official `@ai-sdk/google` provider.
+- **Reasoning Headroom & Output Guarantee**:
   - `gemini-3.6-flash` uses internal thinking/reasoning before emitting text.
   - The service guarantees a generous `maxOutputTokens >= 1200`, ensuring the model never exhausts its budget during reasoning and finishes all sentences completely.
-* **Prompt Structure (`ask-yash.prompt.ts`)**:
+- **Prompt Structure (`ask-yash.prompt.ts`)**:
   - Grounded in canonical portfolio facts with strict instructions to answer in **1–2 concise, structured paragraphs + bullet points**.
   - Strict injection and persona boundaries to prevent jailbreaks or prompt leakage.
 
 ### Service 2: RAG Knowledge Engine (pgvector + gpt-4o-mini)
-* **Purpose**: Deep-dive technical question answering with source citations directly retrieved from documentation.
-* **Vector Store**: PostgreSQL 16 with `pgvector` (`vector(1536)`).
-* **Embedding Model**: OpenAI `text-embedding-3-small`.
-* **Cosine Retrieval Logic**:
+
+- **Purpose**: Deep-dive technical question answering with source citations directly retrieved from documentation.
+- **Vector Store**: PostgreSQL 16 with `pgvector` (`vector(1536)`).
+- **Embedding Model**: OpenAI `text-embedding-3-small`.
+- **Cosine Retrieval Logic**:
   $$\text{Similarity Score} = 1 - (\mathbf{chunk\_embedding} \Leftrightarrow \mathbf{query\_embedding})$$
   - Filtered by `similarity_score >= 0.30` and ordered by cosine proximity `LIMIT 4`.
-* **Synthesis Engine**: OpenAI `gpt-4o-mini` reads the retrieved context chunks and synthesizes a grounded answer with bold highlights and architecture breakdowns.
-* **Source Transparency**: The API returns both the synthesized response and the matching document chunks (title, category, similarity score, content snippet).
+- **Synthesis Engine**: OpenAI `gpt-4o-mini` reads the retrieved context chunks and synthesizes a grounded answer with bold highlights and architecture breakdowns.
+- **Source Transparency**: The API returns both the synthesized response and the matching document chunks (title, category, similarity score, content snippet).
 
 ---
 
@@ -382,7 +396,7 @@ The gateway implements a defense-in-depth security pipeline before any prompt is
    - Scans queries against heuristic regex patterns:
      - System prompt extraction (`ignore previous instructions`, `show system prompt`, `reveal instructions`).
      - Roleplay hijacking (`you are now in developer mode`, `DAN mode`, `unrestricted AI`).
-     - Delimiter tampering (```` ```system ````, `[INST]`, `<|im_start|>`).
+     - Delimiter tampering (` ```system `, `[INST]`, `<|im_start|>`).
    - If detected, throws `PromptInjectionError (HTTP 400)` and prevents LLM invocation.
 2. **Topic Boundary Guard (`topic-guard.ts`)**:
    - Evaluates whether the question falls within software engineering, AI architecture, or portfolio background.
@@ -395,17 +409,21 @@ The gateway implements a defense-in-depth security pipeline before any prompt is
 ## 🖥️ Frontend Telemetry HUD & Markdown Rendering
 
 ### 1. Live Session Telemetry HUD (`AILab.tsx`)
+
 The frontend displays real-time telemetry connected to backend session state:
-* **Ask Yash Meter**: Displays remaining questions (e.g. `8 / 8 Req Left`) and remaining token capacity (`10,000 / 10,000 Tokens`) with animated progress bars.
-* **RAG Engine Meter**: Displays remaining RAG questions (`3 / 3 Req Left`) and token quotas.
-* **Rate Guard Indicator**: Displays active status for the 5 req/min window limiter and single-request concurrency lock.
+
+- **Ask Yash Meter**: Displays remaining questions (e.g. `8 / 8 Req Left`) and remaining token capacity (`10,000 / 10,000 Tokens`) with animated progress bars.
+- **RAG Engine Meter**: Displays remaining RAG questions (`3 / 3 Req Left`) and token quotas.
+- **Rate Guard Indicator**: Displays active status for the 5 req/min window limiter and single-request concurrency lock.
 
 ### 2. Semantic Markdown Display (`MarkdownRenderer.tsx`)
+
 LLM responses are formatted using `react-markdown` with customized aesthetic treatments:
-* **Headers (`#`, `##`, `###`)**: Styled with Space Grotesk typography and glowing theme accents.
-* **Lists (`<ul>`, `<ol>`)**: Indented bullet points and numbered sequences with custom spacing.
-* **Code Elements (`<code>`)**: Styled inline monospace chips with glowing border highlights.
-* **Citations Accordion**: Collapsible drawer that lets visitors inspect raw vector chunks and similarity percentages.
+
+- **Headers (`#`, `##`, `###`)**: Styled with Space Grotesk typography and glowing theme accents.
+- **Lists (`<ul>`, `<ol>`)**: Indented bullet points and numbered sequences with custom spacing.
+- **Code Elements (`<code>`)**: Styled inline monospace chips with glowing border highlights.
+- **Citations Accordion**: Collapsible drawer that lets visitors inspect raw vector chunks and similarity percentages.
 
 ---
 
@@ -452,8 +470,8 @@ CREATE TABLE document_chunks (
 );
 
 -- 4. HNSW Vector Index for Sub-Millisecond Cosine Search
-CREATE INDEX document_chunks_embedding_hnsw_idx 
-ON document_chunks 
+CREATE INDEX document_chunks_embedding_hnsw_idx
+ON document_chunks
 USING hnsw (embedding vector_cosine_ops)
 WITH (m = 16, ef_construction = 64);
 
@@ -477,22 +495,26 @@ CREATE TABLE usage_logs (
 ## 🚀 Local Development & Quickstart
 
 ### Prerequisites
-* **Node.js**: v20.x or v22.x
-* **Docker & Docker Compose**: For PostgreSQL (pgvector) & Redis
-* **API Keys**:
+
+- **Node.js**: v20.x or v22.x
+- **Docker & Docker Compose**: For PostgreSQL (pgvector) & Redis
+- **API Keys**:
   - `GEMINI_API_KEY`: [Google AI Studio](https://aistudio.google.com/)
   - `OPENAI_API_KEY`: [OpenAI Platform](https://platform.openai.com/)
 
 ---
 
 ### Step 1: Clone and Start Infrastructure
+
 ```bash
 # 1. Start PostgreSQL (Port 5433) and Redis (Port 6379)
 docker compose up -d
 ```
 
 ### Step 2: Configure Backend Environment
+
 Create `backend/.env`:
+
 ```ini
 NODE_ENV=development
 PORT=4000
@@ -520,6 +542,7 @@ RATE_LIMIT_MAX_REQUESTS=5
 ```
 
 ### Step 3: Run Database Migrations & Ingest Knowledge Base
+
 ```bash
 cd backend
 npm install
@@ -533,15 +556,31 @@ npm run ingest
 # Start backend in development mode
 npm run dev
 ```
-*Backend will start on `http://localhost:4000`.*
 
-### Step 4: Start Frontend
+_Backend will start on `http://localhost:4000`._
+
+### Step 4: Configure & Start Frontend
+
+Create `frontend/.env` (or configure in deployment dashboard):
+
+```ini
+# Development: Leave empty to use Vite proxy (/api -> http://localhost:4000)
+VITE_API_BASE_URL=
+
+# Production (e.g., Vercel / Netlify / Custom Domain):
+# Set to your deployed backend URL:
+# VITE_API_BASE_URL=https://api.yourdomain.com
+```
+
+Start the frontend:
+
 ```bash
 cd ../frontend
 npm install
 npm run dev
 ```
-*Frontend will start on `http://localhost:3000`.*
+
+_Frontend will start on `http://localhost:3000`._
 
 ---
 
@@ -555,6 +594,7 @@ npm test
 ```
 
 ### Test Suite Summary:
+
 ```
  ✓ tests/unit/normalize.test.ts        (1 test)
  ✓ tests/unit/errors.test.ts           (7 tests)
@@ -571,8 +611,10 @@ npm test
 ---
 
 ## 👤 Author
+
 **Yash**  
-*Generative AI & Full-Stack Software Engineer*
-* **Email**: anantyash.2710@gmail.com
-* **LinkedIn**: [linkedin.com/in/anantyash](https://linkedin.com/in/anantyash)
-* **GitHub**: [github.com/anantyash](https://github.com/anantyash)
+_Generative AI & Full-Stack Software Engineer_
+
+- **Email**: anantyash.2710@gmail.com
+- **LinkedIn**: [linkedin.com/in/anantyash](https://linkedin.com/in/anantyash)
+- **GitHub**: [github.com/anantyash](https://github.com/anantyash)
