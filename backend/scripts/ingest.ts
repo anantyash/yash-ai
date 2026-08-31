@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
-  const knowledgeDir = path.resolve(__dirname, "../../knowledge");
+  const knowledgeDir = path.resolve(__dirname, "../knowledge");
   try {
     const result =
       await ingestionService.ingestKnowledgeDirectory(knowledgeDir);
