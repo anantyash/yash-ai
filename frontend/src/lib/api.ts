@@ -138,6 +138,7 @@ class ApiClient {
             "Content-Type": "application/json",
             ...(storedId ? { "X-Session-Id": storedId } : {}),
           },
+          body: JSON.stringify(storedId ? { sessionId: storedId } : {}),
         });
 
         if (!res.ok) {

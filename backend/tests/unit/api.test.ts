@@ -7,6 +7,7 @@ import { geminiService } from "../../src/services/ai/gemini.service.js";
 import { openaiService } from "../../src/services/ai/openai.service.js";
 import { vectorRepository } from "../../src/repositories/vector.repository.js";
 import { sessionRepository } from "../../src/repositories/session.repository.js";
+import { env } from "../../src/config/env.js";
 
 describe("AI Gateway Endpoints", () => {
   const app = createApp();
@@ -84,6 +85,41 @@ describe("AI Gateway Endpoints", () => {
       expect(res.body.sessionId).toBe(mockSessionId);
       expect(res.body.limits.askQuestionsRemaining).toBe(8);
       expect(res.body.limits.ragQuestionsRemaining).toBe(3);
+    });
+
+    it("should reuse an existing valid session and return remaining quotas when X-Session-Id is provided", async () => {
+      vi.spyOn(sessionRepository, "getSessionById").mockResolvedValue({
+        id: mockSessionId,
+        ip_hash: "hash",
+        user_agent: null,
+        ask_questions: 2,
+        rag_questions: 1,
+        ask_tokens: 1500,
+        rag_tokens: 800,
+        active_requests: 0,
+        expires_at: new Date(Date.now() + 86400000),
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      const res = await request(app)
+        .post("/api/session")
+        .set("X-Session-Id", mockSessionId);
+
+      expect(res.status).toBe(200);
+      expect(res.body.sessionId).toBe(mockSessionId);
+      expect(res.body.limits.askQuestionsRemaining).toBe(
+        env.ASK_SESSION_LIMIT - 2,
+      );
+      expect(res.body.limits.ragQuestionsRemaining).toBe(
+        env.RAG_SESSION_LIMIT - 1,
+      );
+      expect(res.body.limits.askTokensRemaining).toBe(
+        env.ASK_SESSION_TOKEN_BUDGET - 1500,
+      );
+      expect(res.body.limits.ragTokensRemaining).toBe(
+        env.RAG_SESSION_TOKEN_BUDGET - 800,
+      );
     });
   });
 
