@@ -282,7 +282,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
                 >
                   <div className="flex flex-col">
                     <span className="font-display font-bold text-sm text-white">
-                      Yash (Anant Yash)
+                      Yash
                     </span>
                     <span
                       className="text-[10px] font-mono"
