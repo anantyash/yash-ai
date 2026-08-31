@@ -98,11 +98,7 @@ export const AILab: React.FC = () => {
       const res = await api.askYash(queryToSend);
       setAskResult(res);
     } catch (err: any) {
-      const errorObj: ApiError = {
-        code: err.code || "ERROR",
-        message: err.message || "Unable to process your question at this time.",
-      };
-      setAskError(errorObj);
+      setAskError(err);
       if (err.code === "RATE_LIMIT_EXCEEDED") {
         startCooldown(err.retryAfterSeconds || 60);
       }
@@ -127,11 +123,7 @@ export const AILab: React.FC = () => {
       const res = await api.queryRag(queryToSend);
       setRagResult(res);
     } catch (err: any) {
-      const errorObj: ApiError = {
-        code: err.code || "ERROR",
-        message: err.message || "Unable to retrieve RAG response at this time.",
-      };
-      setRagError(errorObj);
+      setRagError(err);
       if (err.code === "RATE_LIMIT_EXCEEDED") {
         startCooldown(err.retryAfterSeconds || 60);
       }
@@ -160,20 +152,20 @@ export const AILab: React.FC = () => {
   return (
     <section
       id="ai-lab"
-      className="py-24 px-4 sm:px-6 lg:px-8 border-t border-white/5 relative"
+      className="py-24 px-4 sm:px-6 lg:px-8 border-t border-[#481E14]/30 relative"
     >
       <div className="max-w-6xl mx-auto flex flex-col gap-12">
         {/* Section Header */}
         <div className="text-center flex flex-col gap-3">
-          <div className="inline-flex items-center gap-2 self-center px-3.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 self-center px-3.5 py-1 rounded-full bg-[#481E14]/30 border border-[#9B3922]/40 text-[#F2613F] text-xs font-mono uppercase tracking-wider">
             <Zap className="size-3.5" />
             Live AI Services & System Telemetry
           </div>
-          <h2 className="font-display font-bold text-3xl sm:text-5xl text-white">
+          <h2 className="font-display font-bold text-3xl sm:text-5xl text-white dark:text-white light:text-[#0C0C0C]">
             Interactive{" "}
-            <span className="text-gradient-cyan">AI Playground</span>
+            <span className="text-gradient-highlight">AI Playground</span>
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto text-xs sm:text-sm font-light leading-relaxed">
+          <p className="text-slate-400 dark:text-slate-400 light:text-slate-600 max-w-2xl mx-auto text-xs sm:text-sm font-light leading-relaxed">
             Directly test the production AI Gateway, Gemini portfolio assistant,
             and OpenAI + pgvector RAG Engine.
           </p>
@@ -182,29 +174,29 @@ export const AILab: React.FC = () => {
         {/* Live Quotas & Token Telemetry HUD */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Ask Yash Telemetry Card */}
-          <div className="p-4 rounded-2xl glass-panel border border-cyan-500/30 flex flex-col gap-2">
+          <div className="p-4 rounded-2xl glass-panel border border-[#481E14]/50 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+              <span className="font-mono text-xs font-bold text-[#F2613F] flex items-center gap-1.5">
                 <Sparkles className="size-3.5" />
                 Ask Yash Quota
               </span>
-              <span className="px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-[11px] font-mono text-cyan-300">
+              <span className="px-2 py-0.5 rounded bg-[#481E14]/40 border border-[#9B3922]/40 text-[11px] font-mono text-[#F2613F]">
                 {limits.askQuestionsRemaining} / 8 Req Left
               </span>
             </div>
             <div className="flex flex-col gap-1 mt-1">
-              <div className="flex justify-between text-[11px] font-mono text-slate-400">
+              <div className="flex justify-between text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600">
                 <span className="flex items-center gap-1">
-                  <Coins className="size-3 text-cyan-400" />
+                  <Coins className="size-3 text-[#F2613F]" />
                   Tokens:
                 </span>
-                <span className="text-slate-200 font-semibold">
+                <span className="text-slate-200 dark:text-slate-200 light:text-slate-800 font-semibold">
                   {limits.askTokensRemaining.toLocaleString()} / 3,000
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+              <div className="w-full h-1.5 bg-[#0C0C0C] rounded-full overflow-hidden border border-[#481E14]/40">
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-[#9B3922] to-[#F2613F] rounded-full transition-all duration-500"
                   style={{ width: `${askTokenPct}%` }}
                 />
               </div>
@@ -212,29 +204,29 @@ export const AILab: React.FC = () => {
           </div>
 
           {/* RAG Engine Telemetry Card */}
-          <div className="p-4 rounded-2xl glass-panel border border-purple-500/30 flex flex-col gap-2">
+          <div className="p-4 rounded-2xl glass-panel border border-[#481E14]/50 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs font-bold text-purple-400 flex items-center gap-1.5">
+              <span className="font-mono text-xs font-bold text-[#9B3922] flex items-center gap-1.5">
                 <Database className="size-3.5" />
                 RAG Engine Quota
               </span>
-              <span className="px-2 py-0.5 rounded bg-purple-950/80 border border-purple-500/30 text-[11px] font-mono text-purple-300">
+              <span className="px-2 py-0.5 rounded bg-[#481E14]/40 border border-[#9B3922]/40 text-[11px] font-mono text-[#9B3922]">
                 {limits.ragQuestionsRemaining} / 3 Req Left
               </span>
             </div>
             <div className="flex flex-col gap-1 mt-1">
-              <div className="flex justify-between text-[11px] font-mono text-slate-400">
+              <div className="flex justify-between text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600">
                 <span className="flex items-center gap-1">
-                  <Coins className="size-3 text-purple-400" />
+                  <Coins className="size-3 text-[#9B3922]" />
                   Tokens:
                 </span>
-                <span className="text-slate-200 font-semibold">
+                <span className="text-slate-200 dark:text-slate-200 light:text-slate-800 font-semibold">
                   {limits.ragTokensRemaining.toLocaleString()} / 2,500
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+              <div className="w-full h-1.5 bg-[#0C0C0C] rounded-full overflow-hidden border border-[#481E14]/40">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-[#481E14] to-[#9B3922] rounded-full transition-all duration-500"
                   style={{ width: `${ragTokenPct}%` }}
                 />
               </div>
@@ -242,24 +234,24 @@ export const AILab: React.FC = () => {
           </div>
 
           {/* Rate Limit & Concurrency Card */}
-          <div className="p-4 rounded-2xl glass-panel border border-emerald-500/30 flex flex-col justify-between gap-2">
+          <div className="p-4 rounded-2xl glass-panel border border-[#481E14]/50 flex flex-col justify-between gap-2">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <span className="font-mono text-xs font-bold text-[#F2613F] flex items-center gap-1.5">
                 <Activity className="size-3.5" />
                 Rate & Concurrency Guard
               </span>
-              <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
+              <span className="px-2 py-0.5 rounded bg-[#481E14]/40 border border-[#9B3922]/40 text-[11px] font-mono text-[#F2613F]">
                 Active
               </span>
             </div>
-            <div className="text-[11px] font-mono text-slate-300 flex flex-col gap-1">
+            <div className="text-[11px] font-mono text-slate-300 dark:text-slate-300 light:text-slate-700 flex flex-col gap-1">
               <div className="flex justify-between">
-                <span className="text-slate-400">Window Limit:</span>
-                <span className="text-emerald-300">5 req / min</span>
+                <span className="text-slate-400 dark:text-slate-400 light:text-slate-600">Window Limit:</span>
+                <span className="text-[#F2613F]">5 req / min</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Concurrency:</span>
-                <span className="text-slate-200">1 active req / session</span>
+                <span className="text-slate-400 dark:text-slate-400 light:text-slate-600">Concurrency:</span>
+                <span className="text-slate-200 dark:text-slate-200 light:text-slate-800">1 active req / session</span>
               </div>
             </div>
           </div>
@@ -267,17 +259,17 @@ export const AILab: React.FC = () => {
 
         {/* Tab Switcher */}
         <div className="flex justify-center">
-          <div className="p-1.5 rounded-2xl bg-slate-950/90 border border-white/10 flex flex-wrap gap-1 shadow-2xl">
+          <div className="p-1.5 rounded-2xl bg-[#0C0C0C] dark:bg-[#0C0C0C] light:bg-[#FFFFFF] border border-[#481E14]/60 flex flex-wrap gap-1 shadow-2xl">
             <button
               onClick={() => setActiveTab("ask")}
               className={cn(
                 "px-5 py-2.5 rounded-xl font-mono text-xs sm:text-sm font-medium transition-all flex items-center gap-2",
                 activeTab === "ask"
-                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-500/10"
+                  ? "bg-[#481E14]/60 text-[#F2613F] border border-[#9B3922] shadow-lg shadow-[#F2613F]/10 font-bold"
                   : "text-slate-400 hover:text-white",
               )}
             >
-              <Sparkles className="size-4 text-cyan-400" />
+              <Sparkles className="size-4 text-[#F2613F]" />
               <span>Ask Yash (Gemini)</span>
             </button>
 
@@ -286,11 +278,11 @@ export const AILab: React.FC = () => {
               className={cn(
                 "px-5 py-2.5 rounded-xl font-mono text-xs sm:text-sm font-medium transition-all flex items-center gap-2",
                 activeTab === "rag"
-                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-lg shadow-purple-500/10"
+                  ? "bg-[#481E14]/60 text-[#F2613F] border border-[#9B3922] shadow-lg shadow-[#F2613F]/10 font-bold"
                   : "text-slate-400 hover:text-white",
               )}
             >
-              <Database className="size-4 text-purple-400" />
+              <Database className="size-4 text-[#9B3922]" />
               <span>RAG Engine (OpenAI + pgvector)</span>
             </button>
 
@@ -299,11 +291,11 @@ export const AILab: React.FC = () => {
               className={cn(
                 "px-5 py-2.5 rounded-xl font-mono text-xs sm:text-sm font-medium transition-all flex items-center gap-2",
                 activeTab === "architecture"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/10"
+                  ? "bg-[#481E14]/60 text-[#F2613F] border border-[#9B3922] shadow-lg shadow-[#F2613F]/10 font-bold"
                   : "text-slate-400 hover:text-white",
               )}
             >
-              <Layers className="size-4 text-emerald-400" />
+              <Layers className="size-4 text-[#F2613F]" />
               <span>Architecture Visualizer</span>
             </button>
           </div>
@@ -311,14 +303,14 @@ export const AILab: React.FC = () => {
 
         {/* Global Cooldown Alert */}
         {cooldown > 0 && (
-          <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs font-mono flex items-center justify-between gap-3 animate-fadeIn">
+          <div className="p-4 rounded-2xl bg-[#481E14]/40 border border-[#F2613F]/40 text-[#F2613F] text-xs font-mono flex items-center justify-between gap-3 animate-fadeIn">
             <div className="flex items-center gap-2.5">
-              <Timer className="size-4 text-amber-400 animate-spin" />
+              <Timer className="size-4 text-[#F2613F] animate-spin" />
               <span>
                 Client Rate-Limit Cooldown Active: Protecting server quota
               </span>
             </div>
-            <span className="px-3 py-1 rounded-full bg-amber-900/60 font-bold">
+            <span className="px-3 py-1 rounded-full bg-[#481E14] font-bold">
               {cooldown}s remaining
             </span>
           </div>
@@ -326,22 +318,21 @@ export const AILab: React.FC = () => {
 
         {/* Tab 1: Ask Yash (Gemini) */}
         {activeTab === "ask" && (
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/30 flex flex-col gap-6 animate-fadeIn">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-[#481E14]/50 flex flex-col gap-6 animate-fadeIn">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#481E14]/40 pb-4">
               <div>
-                <h3 className="font-display font-bold text-xl text-white flex items-center gap-2">
-                  <Sparkles className="size-5 text-cyan-400" />
+                <h3 className="font-display font-bold text-xl text-white dark:text-white light:text-[#0C0C0C] flex items-center gap-2">
+                  <Sparkles className="size-5 text-[#F2613F]" />
                   Ask Yash AI Assistant
                 </h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">
-                  Powered by Google Gemini 1.5 Flash • Grounded in portfolio
-                  facts
+                <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 font-mono mt-0.5">
+                  Powered by Google Gemini 1.5 Flash • Grounded in portfolio facts
                 </p>
               </div>
 
               <div className="flex items-center gap-2 text-xs font-mono">
-                <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-cyan-300 flex items-center gap-1.5">
-                  <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="px-3 py-1 rounded-full bg-[#481E14]/30 border border-[#9B3922]/40 text-[#F2613F] flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-[#F2613F] animate-pulse" />
                   <span>{limits.askQuestionsRemaining} questions left</span>
                 </span>
               </div>
@@ -349,7 +340,7 @@ export const AILab: React.FC = () => {
 
             {/* Suggested Question Chips */}
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+              <span className="text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider">
                 Suggested Questions:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -365,7 +356,7 @@ export const AILab: React.FC = () => {
                       setAskQuery(q);
                       handleAskSubmit(undefined, q);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-xs font-mono text-slate-300 hover:text-cyan-300 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 rounded-xl bg-[#481E14]/20 hover:bg-[#481E14]/50 border border-[#481E14]/60 hover:border-[#F2613F]/50 text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-700 hover:text-[#F2613F] transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {q} ↗
                   </button>
@@ -398,7 +389,7 @@ export const AILab: React.FC = () => {
                     cooldown > 0 ||
                     limits.askQuestionsRemaining <= 0
                   }
-                  className="w-full px-5 py-4 rounded-2xl bg-slate-950/90 border border-slate-800 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-cyan-500 transition-colors pr-28 disabled:opacity-50"
+                  className="w-full px-5 py-4 rounded-2xl bg-[#0C0C0C]/80 dark:bg-[#0C0C0C]/80 light:bg-[#FFFFFF] border border-[#481E14]/60 text-white dark:text-white light:text-[#0C0C0C] placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-[#F2613F] transition-colors pr-28 disabled:opacity-50"
                 />
                 <button
                   type="submit"
@@ -408,7 +399,7 @@ export const AILab: React.FC = () => {
                     cooldown > 0 ||
                     limits.askQuestionsRemaining <= 0
                   }
-                  className="absolute right-2.5 top-2.5 bottom-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-mono text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50 transition-all shadow-md shadow-cyan-500/20"
+                  className="absolute right-2.5 top-2.5 bottom-2.5 px-4 rounded-xl bg-gradient-to-r from-[#9B3922] via-[#9B3922] to-[#F2613F] hover:from-[#F2613F] hover:to-[#FFA07A] text-white font-mono text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50 transition-all shadow-md shadow-[#F2613F]/20"
                 >
                   {askLoading ? (
                     <Loader2 className="size-4 animate-spin" />
@@ -433,13 +424,13 @@ export const AILab: React.FC = () => {
 
             {/* Response Output Card */}
             {askResult && (
-              <div className="p-6 rounded-2xl bg-slate-950/80 border border-cyan-500/30 flex flex-col gap-4">
-                <div className="flex items-center justify-between border-b border-white/5 pb-3 text-xs font-mono text-slate-400">
-                  <div className="flex items-center gap-2 text-cyan-400 font-semibold">
+              <div className="p-6 rounded-2xl bg-[#0C0C0C]/90 dark:bg-[#0C0C0C]/90 light:bg-[#FFFFFF] border border-[#481E14]/60 flex flex-col gap-4">
+                <div className="flex items-center justify-between border-b border-[#481E14]/40 pb-3 text-xs font-mono text-slate-400 dark:text-slate-400 light:text-slate-600">
+                  <div className="flex items-center gap-2 text-[#F2613F] font-semibold">
                     <CheckCircle2 className="size-4 text-emerald-400" />
                     <span>Gemini Verified Response</span>
                     {askResult.cacheHit && (
-                      <span className="px-2 py-0.5 rounded bg-purple-950/80 border border-purple-500/30 text-purple-300 text-[10px]">
+                      <span className="px-2 py-0.5 rounded bg-[#481E14]/40 border border-[#9B3922]/40 text-[#F2613F] text-[10px]">
                         Redis Cache Hit (0 Tokens)
                       </span>
                     )}
@@ -454,27 +445,27 @@ export const AILab: React.FC = () => {
                 </div>
 
                 <div className="py-1">
-                  <MarkdownRenderer content={askResult.answer} theme="cyan" />
+                  <MarkdownRenderer content={askResult.answer} theme="highlight" />
                 </div>
 
                 {/* Telemetry Footer */}
-                <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-slate-400">
+                <div className="pt-3 border-t border-[#481E14]/40 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600">
                   <div className="flex items-center gap-4">
                     <span>
                       Input:{" "}
-                      <strong className="text-slate-300">
+                      <strong className="text-slate-300 dark:text-slate-300 light:text-slate-700">
                         {askResult.usage.inputTokens}
                       </strong>
                     </span>
                     <span>
                       Output:{" "}
-                      <strong className="text-slate-300">
+                      <strong className="text-slate-300 dark:text-slate-300 light:text-slate-700">
                         {askResult.usage.outputTokens}
                       </strong>
                     </span>
                     <span>
                       Total:{" "}
-                      <strong className="text-cyan-400">
+                      <strong className="text-[#F2613F]">
                         {askResult.usage.totalTokens} tokens
                       </strong>
                     </span>
@@ -495,27 +486,26 @@ export const AILab: React.FC = () => {
 
         {/* Tab 2: RAG Engine (OpenAI + pgvector) */}
         {activeTab === "rag" && (
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 flex flex-col gap-6 animate-fadeIn">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-[#481E14]/50 flex flex-col gap-6 animate-fadeIn">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#481E14]/40 pb-4">
               <div>
-                <h3 className="font-display font-bold text-xl text-white flex items-center gap-2">
-                  <Database className="size-5 text-purple-400" />
+                <h3 className="font-display font-bold text-xl text-white dark:text-white light:text-[#0C0C0C] flex items-center gap-2">
+                  <Database className="size-5 text-[#9B3922]" />
                   RAG Knowledge Engine
                 </h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">
-                  Semantic retrieval over PostgreSQL pgvector (HNSW cosine
-                  index) + OpenAI gpt-4o-mini
+                <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 font-mono mt-0.5">
+                  Semantic retrieval over PostgreSQL pgvector (HNSW cosine index) + OpenAI gpt-4o-mini
                 </p>
               </div>
 
-              <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-purple-300 text-xs font-mono self-start sm:self-auto">
+              <span className="px-3 py-1 rounded-full bg-[#481E14]/30 border border-[#9B3922]/40 text-[#9B3922] text-xs font-mono self-start sm:self-auto">
                 {limits.ragQuestionsRemaining} queries left
               </span>
             </div>
 
             {/* Suggested RAG Queries */}
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+              <span className="text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider">
                 Deep-Dive Queries:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -535,7 +525,7 @@ export const AILab: React.FC = () => {
                       setRagQuery(q);
                       handleRagSubmit(undefined, q);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-purple-500/40 text-xs font-mono text-slate-300 hover:text-purple-300 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 rounded-xl bg-[#481E14]/20 hover:bg-[#481E14]/50 border border-[#481E14]/60 hover:border-[#F2613F]/50 text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-700 hover:text-[#F2613F] transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {q} ↗
                   </button>
@@ -568,7 +558,7 @@ export const AILab: React.FC = () => {
                     cooldown > 0 ||
                     limits.ragQuestionsRemaining <= 0
                   }
-                  className="w-full px-5 py-4 rounded-2xl bg-slate-950/90 border border-slate-800 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-purple-500 transition-colors pr-28 disabled:opacity-50"
+                  className="w-full px-5 py-4 rounded-2xl bg-[#0C0C0C]/80 dark:bg-[#0C0C0C]/80 light:bg-[#FFFFFF] border border-[#481E14]/60 text-white dark:text-white light:text-[#0C0C0C] placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-[#F2613F] transition-colors pr-28 disabled:opacity-50"
                 />
                 <button
                   type="submit"
@@ -578,7 +568,7 @@ export const AILab: React.FC = () => {
                     cooldown > 0 ||
                     limits.ragQuestionsRemaining <= 0
                   }
-                  className="absolute right-2.5 top-2.5 bottom-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-mono text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50 transition-all shadow-md shadow-purple-500/20"
+                  className="absolute right-2.5 top-2.5 bottom-2.5 px-4 rounded-xl bg-gradient-to-r from-[#9B3922] via-[#9B3922] to-[#F2613F] hover:from-[#F2613F] hover:to-[#FFA07A] text-white font-mono text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50 transition-all shadow-md shadow-[#F2613F]/20"
                 >
                   {ragLoading ? (
                     <Loader2 className="size-4 animate-spin" />
@@ -605,13 +595,13 @@ export const AILab: React.FC = () => {
             {ragResult && (
               <div className="flex flex-col gap-5 animate-fadeIn">
                 {/* 1. Primary Synthesized Grounded Output */}
-                <div className="p-6 sm:p-7 rounded-2xl bg-slate-950/80 border border-purple-500/30 shadow-xl shadow-purple-950/20 flex flex-col gap-4">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-3 text-xs font-mono text-purple-400">
+                <div className="p-6 sm:p-7 rounded-2xl bg-[#0C0C0C]/90 dark:bg-[#0C0C0C]/90 light:bg-[#FFFFFF] border border-[#481E14]/60 shadow-xl flex flex-col gap-4">
+                  <div className="flex items-center justify-between border-b border-[#481E14]/40 pb-3 text-xs font-mono text-[#F2613F]">
                     <span className="font-semibold flex items-center gap-1.5">
                       <ShieldCheck className="size-4 text-emerald-400" />
                       Grounded Answer (gpt-4o-mini)
                     </span>
-                    <span className="text-slate-400">
+                    <span className="text-slate-400 dark:text-slate-400 light:text-slate-600">
                       {ragResult.usage.totalTokens} Tokens
                     </span>
                   </div>
@@ -619,28 +609,28 @@ export const AILab: React.FC = () => {
                   <div className="py-1">
                     <MarkdownRenderer
                       content={ragResult.answer}
-                      theme="purple"
+                      theme="system"
                     />
                   </div>
 
                   {/* Telemetry Footer */}
-                  <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-slate-400">
+                  <div className="pt-3 border-t border-[#481E14]/40 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600">
                     <div className="flex items-center gap-4">
                       <span>
                         Input:{" "}
-                        <strong className="text-slate-300">
+                        <strong className="text-slate-300 dark:text-slate-300 light:text-slate-700">
                           {ragResult.usage.inputTokens}
                         </strong>
                       </span>
                       <span>
                         Output:{" "}
-                        <strong className="text-slate-300">
+                        <strong className="text-slate-300 dark:text-slate-300 light:text-slate-700">
                           {ragResult.usage.outputTokens}
                         </strong>
                       </span>
                       <span>
                         Total:{" "}
-                        <strong className="text-purple-400">
+                        <strong className="text-[#F2613F]">
                           {ragResult.usage.totalTokens} tokens
                         </strong>
                       </span>
@@ -661,10 +651,10 @@ export const AILab: React.FC = () => {
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={() => setShowSources(!showSources)}
-                      className="px-4 py-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-900 border border-purple-500/20 text-xs font-mono text-slate-300 hover:text-purple-300 flex items-center justify-between transition-all"
+                      className="px-4 py-2.5 rounded-xl bg-[#481E14]/20 hover:bg-[#481E14]/40 border border-[#481E14]/60 text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-700 hover:text-[#F2613F] flex items-center justify-between transition-all"
                     >
                       <div className="flex items-center gap-2">
-                        <FileText className="size-3.5 text-purple-400" />
+                        <FileText className="size-3.5 text-[#F2613F]" />
                         <span>
                           Verified Knowledge Base Citations (
                           {ragResult.sources.length} matching vector chunks)
@@ -682,18 +672,18 @@ export const AILab: React.FC = () => {
                         {ragResult.sources.map((src, sIdx) => (
                           <div
                             key={sIdx}
-                            className="p-4 rounded-2xl bg-slate-950/90 border border-purple-500/20 flex flex-col gap-2"
+                            className="p-4 rounded-2xl bg-[#0C0C0C] dark:bg-[#0C0C0C] light:bg-[#FFFFFF] border border-[#481E14]/60 flex flex-col gap-2"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-display font-bold text-xs text-white flex items-center gap-1.5">
-                                <FileText className="size-3.5 text-purple-400" />
+                              <span className="font-display font-bold text-xs text-white dark:text-white light:text-[#0C0C0C] flex items-center gap-1.5">
+                                <FileText className="size-3.5 text-[#F2613F]" />
                                 {src.title}
                               </span>
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
+                              <span className="px-2 py-0.5 rounded-full bg-[#481E14]/40 border border-[#9B3922]/40 text-[11px] font-mono text-[#F2613F]">
                                 {(src.score * 100).toFixed(0)}% Similarity
                               </span>
                             </div>
-                            <p className="text-[11px] font-mono text-slate-400 line-clamp-3 leading-relaxed">
+                            <p className="text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600 line-clamp-3 leading-relaxed">
                               {src.content}
                             </p>
                           </div>
@@ -709,13 +699,13 @@ export const AILab: React.FC = () => {
 
         {/* Tab 3: System Architecture Visualizer */}
         {activeTab === "architecture" && (
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-emerald-500/30 flex flex-col gap-8 animate-fadeIn">
-            <div className="flex flex-col gap-1 border-b border-white/10 pb-4">
-              <h3 className="font-display font-bold text-xl text-white flex items-center gap-2">
-                <Layers className="size-5 text-emerald-400" />
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-[#481E14]/50 flex flex-col gap-8 animate-fadeIn">
+            <div className="flex flex-col gap-1 border-b border-[#481E14]/40 pb-4">
+              <h3 className="font-display font-bold text-xl text-white dark:text-white light:text-[#0C0C0C] flex items-center gap-2">
+                <Layers className="size-5 text-[#F2613F]" />
                 Production AI Gateway & Control Plane Architecture
               </h3>
-              <p className="text-xs text-slate-400 font-mono">
+              <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 font-mono">
                 Click any component node below to inspect its operational role,
                 security safeguards, and implementation details.
               </p>
@@ -751,14 +741,14 @@ export const AILab: React.FC = () => {
                   className={cn(
                     "p-4 rounded-2xl text-left border transition-all flex flex-col gap-1.5",
                     selectedNode === node.id
-                      ? "bg-emerald-950/40 border-emerald-500 text-white shadow-lg shadow-emerald-500/10"
-                      : "bg-slate-950/80 border-slate-800 text-slate-400 hover:border-slate-700",
+                      ? "bg-[#481E14]/60 border-[#F2613F] text-white shadow-lg shadow-[#F2613F]/10 font-bold"
+                      : "bg-[#0C0C0C] dark:bg-[#0C0C0C] light:bg-[#FFFFFF] border-[#481E14]/50 text-slate-400 hover:border-[#9B3922]",
                   )}
                 >
-                  <span className="font-mono text-xs font-bold text-emerald-400">
+                  <span className="font-mono text-xs font-bold text-[#F2613F]">
                     {node.label}
                   </span>
-                  <span className="text-[11px] font-mono text-slate-400">
+                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600">
                     {node.desc}
                   </span>
                 </button>
@@ -766,10 +756,10 @@ export const AILab: React.FC = () => {
             </div>
 
             {/* Deep Node Detail Box */}
-            <div className="p-6 rounded-2xl bg-slate-950/90 border border-emerald-500/20 font-mono text-xs leading-relaxed text-slate-300">
+            <div className="p-6 rounded-2xl bg-[#0C0C0C] dark:bg-[#0C0C0C] light:bg-[#FFFFFF] border border-[#481E14]/60 font-mono text-xs leading-relaxed text-slate-300 dark:text-slate-300 light:text-slate-700">
               {selectedNode === "gateway" && (
                 <div className="flex flex-col gap-3">
-                  <div className="text-emerald-400 font-bold text-sm">
+                  <div className="text-[#F2613F] font-bold text-sm">
                     [AI Gateway & Defense-in-Depth]
                   </div>
                   <p>
@@ -793,7 +783,7 @@ export const AILab: React.FC = () => {
 
               {selectedNode === "budget" && (
                 <div className="flex flex-col gap-3">
-                  <div className="text-emerald-400 font-bold text-sm">
+                  <div className="text-[#F2613F] font-bold text-sm">
                     [4-Tier Token Budget & Reservation Architecture]
                   </div>
                   <p>
@@ -817,7 +807,7 @@ export const AILab: React.FC = () => {
 
               {selectedNode === "pgvector" && (
                 <div className="flex flex-col gap-3">
-                  <div className="text-emerald-400 font-bold text-sm">
+                  <div className="text-[#F2613F] font-bold text-sm">
                     [PostgreSQL 16 + pgvector Storage Layer]
                   </div>
                   <p>
@@ -837,7 +827,7 @@ export const AILab: React.FC = () => {
 
               {selectedNode === "redis" && (
                 <div className="flex flex-col gap-3">
-                  <div className="text-emerald-400 font-bold text-sm">
+                  <div className="text-[#F2613F] font-bold text-sm">
                     [Redis 7 Control Plane & Caching]
                   </div>
                   <p>

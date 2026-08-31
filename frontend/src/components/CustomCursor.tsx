@@ -20,8 +20,8 @@ export const CustomCursor: React.FC = () => {
     };
 
     const render = () => {
-      ringX += (mouseX - ringX) * 0.15;
-      ringY += (mouseY - ringY) * 0.15;
+      ringX += (mouseX - ringX) * 0.12;
+      ringY += (mouseY - ringY) * 0.12;
       if (cursorRingRef.current) {
         cursorRingRef.current.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
       }
@@ -39,13 +39,34 @@ export const CustomCursor: React.FC = () => {
 
   return (
     <>
+      {/* Solid dot — sharp accent */}
       <div
         ref={cursorDotRef}
-        className="fixed top-0 left-0 size-2 bg-cyan-400 rounded-full pointer-events-none z-50 -ml-1 -mt-1 shadow-glow transition-opacity duration-300 hidden md:block"
+        className="fixed top-0 left-0 pointer-events-none z-[9999] hidden md:block"
+        style={{
+          width: "7px",
+          height: "7px",
+          marginLeft: "-3.5px",
+          marginTop: "-3.5px",
+          borderRadius: "50%",
+          background: "#F2613F",
+          boxShadow: "0 0 8px rgba(242, 97, 63, 0.55)",
+          transition: "opacity 0.2s ease",
+        }}
       />
+      {/* Trailing ring — muted rust */}
       <div
         ref={cursorRingRef}
-        className="fixed top-0 left-0 size-8 border border-cyan-500/40 rounded-full pointer-events-none z-50 -ml-4 -mt-4 transition-transform duration-75 hidden md:block"
+        className="fixed top-0 left-0 pointer-events-none z-[9998] hidden md:block"
+        style={{
+          width: "28px",
+          height: "28px",
+          marginLeft: "-14px",
+          marginTop: "-14px",
+          borderRadius: "50%",
+          border: "1px solid rgba(155, 57, 34, 0.50)",
+          transition: "opacity 0.2s ease",
+        }}
       />
     </>
   );

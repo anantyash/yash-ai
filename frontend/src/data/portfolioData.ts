@@ -25,8 +25,7 @@ export const portfolioData = {
     location: "Jharkhand, India (Open to Remote / Relocation)",
     linkedin: "https://www.linkedin.com/in/anantyash",
     github: "https://github.com/anantyash",
-    avatar:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+    avatar: "/assets/img-yash.jpg",
     roles: [
       "Generative AI Engineer",
       "AI Systems Engineer",

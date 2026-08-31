@@ -58,7 +58,7 @@ export const NeuralCanvas: React.FC = () => {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${0.12 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `rgba(155, 57, 34, ${0.18 * (1 - dist / 120)})`;
             ctx.lineWidth = 0.7;
             ctx.stroke();
           }
@@ -69,7 +69,7 @@ export const NeuralCanvas: React.FC = () => {
       for (const p of particles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(56, 189, 248, 0.45)";
+        ctx.fillStyle = "rgba(242, 97, 63, 0.45)";
         ctx.fill();
 
         p.x += p.vx;
