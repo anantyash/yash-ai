@@ -9,8 +9,6 @@ import {
   Cpu,
   ShieldCheck,
   Award,
-  Zap,
-  CheckCircle2,
   Code2,
 } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -27,31 +25,67 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.from(".gsap-hero-badge", { opacity: 0, y: -12, duration: 0.5 })
+      tl.from(".gsap-hero-badge", {
+        opacity: 0,
+        y: -12,
+        duration: 0.5,
+        clearProps: "opacity,transform",
+      })
         .from(
           ".gsap-hero-title",
-          { opacity: 0, y: 28, duration: 0.75 },
+          {
+            opacity: 0,
+            y: 28,
+            duration: 0.75,
+            clearProps: "opacity,transform",
+          },
           "-=0.25",
         )
-        .from(".gsap-hero-pitch", { opacity: 0, y: 18, duration: 0.6 }, "-=0.4")
+        .from(
+          ".gsap-hero-pitch",
+          { opacity: 0, y: 18, duration: 0.6, clearProps: "opacity,transform" },
+          "-=0.4",
+        )
         .from(
           ".gsap-hero-image",
-          { opacity: 0, scale: 0.93, duration: 0.75 },
+          {
+            opacity: 0,
+            scale: 0.93,
+            duration: 0.75,
+            clearProps: "opacity,transform",
+          },
           "-=0.45",
         )
         .from(
           ".gsap-hero-lens",
-          { opacity: 0, scale: 0.97, duration: 0.65 },
+          {
+            opacity: 0,
+            scale: 0.97,
+            duration: 0.65,
+            clearProps: "opacity,transform",
+          },
           "-=0.3",
         )
         .from(
           ".gsap-hero-cta",
-          { opacity: 0, y: 18, stagger: 0.07, duration: 0.55 },
+          {
+            opacity: 0,
+            y: 18,
+            stagger: 0.07,
+            duration: 0.55,
+            clearProps: "opacity,transform",
+          },
           "-=0.35",
         )
         .from(
           ".gsap-hero-stat",
-          { opacity: 0, y: 16, stagger: 0.07, duration: 0.5 },
+          {
+            opacity: 0,
+            y: 16,
+            stagger: 0.07,
+            duration: 0.5,
+            clearProps: "opacity,transform",
+          },
           "-=0.3",
         );
     }, heroRef);
@@ -130,7 +164,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
             </p>
 
             {/* Skill pills — neutral, no orange */}
-            <div className="flex flex-wrap gap-2 pt-1">
+            {/* <div className="flex flex-wrap gap-2 pt-1">
               {[
                 {
                   icon: <Zap className="size-3" />,
@@ -158,11 +192,11 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
                   {label}
                 </span>
               ))}
-            </div>
+            </div> */}
 
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3 pt-3 w-full">
-              {/* Primary — single accent use */}
+              {/* Primary CTA — accent gradient */}
               <a
                 href="#ai-lab"
                 className="gsap-hero-cta px-6 py-3.5 rounded-xl font-mono text-xs font-semibold tracking-wider uppercase transition-all hover:-translate-y-0.5 flex items-center gap-2 shadow-lg"
@@ -170,34 +204,35 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
                   background:
                     "linear-gradient(135deg, var(--accent-dim), var(--accent))",
                   color: "#fff",
+                  boxShadow: "0 4px 20px rgba(242,97,63,0.25)",
                 }}
               >
                 <Sparkles className="size-3.5" />
-                <span>[ Test Live AI Gateway ↗ ]</span>
+                <span> Test Live AI Gateway </span>
               </a>
 
-              {/* Secondary — ghost */}
+              {/* View Resume — visible ghost */}
               <button
                 onClick={onOpenResume}
                 className="gsap-hero-cta px-5 py-3.5 rounded-xl font-mono text-xs tracking-wider uppercase transition-all hover:-translate-y-0.5 flex items-center gap-2"
                 style={{
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border-mid)",
-                  color: "var(--text-secondary)",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  color: "var(--text-primary)",
                 }}
               >
                 <FileText className="size-3.5" />
                 <span>View Resume</span>
               </button>
 
-              {/* Projects — ghost */}
+              {/* Projects — visible ghost */}
               <a
                 href="#projects"
                 className="gsap-hero-cta px-5 py-3.5 rounded-xl font-mono text-xs tracking-wider uppercase transition-all hover:-translate-y-0.5 flex items-center gap-2"
                 style={{
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border-subtle)",
-                  color: "var(--text-secondary)",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "var(--text-primary)",
                 }}
               >
                 <Terminal className="size-3.5" />
@@ -226,9 +261,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
                     title={title}
                     className="gsap-hero-cta p-3.5 rounded-xl transition-all hover:-translate-y-0.5"
                     style={{
-                      background: "var(--bg-card)",
-                      border: "1px solid var(--border-subtle)",
-                      color: "var(--text-secondary)",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      color: "var(--text-primary)",
                     }}
                   >
                     {icon}

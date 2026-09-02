@@ -13,12 +13,18 @@ export const Footer: React.FC = () => {
       }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2" style={{ color: "var(--text-secondary)" }}>
+        <div
+          className="flex items-center gap-2"
+          style={{ color: "var(--text-secondary)" }}
+        >
           <span>Engineered by</span>
-          <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
+          <span
+            className="font-semibold"
+            style={{ color: "var(--text-primary)" }}
+          >
             {portfolioData.personal.name}
           </span>
-          <span>• Generative AI & Systems</span>
+          <span>• Powered by AI</span>
         </div>
 
         <div className="flex items-center gap-6">

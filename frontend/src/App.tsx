@@ -31,7 +31,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-x-hidden font-sans">
+    <div className="flex flex-col relative font-sans">
       {/* Custom Magnetic Cursor */}
       <CustomCursor />
 
@@ -45,8 +45,8 @@ export const App: React.FC = () => {
       {/* Nav */}
       <Navbar onCopyEmail={showNotification} />
 
-      {/* Main — flex-1 fills remaining space so footer stays at bottom */}
-      <main className="relative z-10 flex-1">
+      {/* Main */}
+      <main className="relative z-10">
         <Hero onOpenResume={() => setResumeOpen(true)} />
         <AILab />
         <WhatIBuild />
