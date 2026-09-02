@@ -13,6 +13,12 @@
       "skillPath": "skills/creative-portfolio-resume/SKILL.md",
       "computedHash": "30fcef14a0360ad6f34135c58c118bbbe0eee93646d1ae3873d793a27db995c0"
     },
+    "deploy-to-vercel": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/deploy-to-vercel/SKILL.md",
+      "computedHash": "03e0eaaa9bf13ba1e7ffa387f5893de6f324c0868c627001f179395a8feaa7c9"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
